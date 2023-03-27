@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,12 @@ import 'package:whats_in_my_fridge/models/list_item.dart';
 import 'package:opengtindb/opengtindb.dart';
 import 'package:whats_in_my_fridge/views/item_list_tile.dart';
 
+import 'services/pref_service.dart';
+import 'services/sound_service.dart';
+import 'views/list_page.dart';
+
 Future<void> main() async {
+  await PrefService.init();
   runApp(const MyApp());
 }
 
@@ -19,8 +25,13 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final BarcodeApi api = BarcodeApi.guest();
-  final List<ListItem> _items = [];
+  List<ListItem> _items = [];
+
+  @override
+  void initState() {
+    _items = PrefService.get.loadItems();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +44,7 @@ class MyAppState extends State<MyApp> {
           icon: const Icon(Icons.camera),
           onPressed: () => _scanBarcodes(),
         ),
-        body: Builder(builder: (BuildContext context) {
-          if (_items.isEmpty) {
-            return Center(child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.new_releases, color: Colors.blueGrey, size: 35),
-                SizedBox(height: 20),
-                Text("Du hast noch keine Produkte zu deiner Liste hinzugefügt."),
-              ],
-            ));
-          }
-          return ListView.builder(
-            itemBuilder: (context, index) => Card(
-              child: ItemListTile(api, _items[_items.length-index-1]),
-            ),
-            itemCount: _items.length,
-          );
-          }
-        ),
+        body: ListPage(_items),
       ),
     );
   }
@@ -69,19 +62,13 @@ class MyAppState extends State<MyApp> {
       final bc = barcode.toString();
       if (bc.length != 8 && bc.length != 13) continue;
       //if (!isValidBarcode(barcode)) continue;
-      _playSound();
+      SoundService().beep();
       if (mounted) {
         setState(() {
           _items.add(ListItem(barcode));
         });
       }
+      await PrefService.get.saveItems(_items);
     }
-  }
-
-  Future<void> _playSound() async {
-    // https://www.soundjay.com/beep-sounds-1.html
-    final player = AudioPlayer();
-    final source = AssetSource("beep-07a.mp3");
-    await player.play(source);
   }
 }

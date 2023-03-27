@@ -1,6 +1,18 @@
 class ListItem {
   final String barcode;
-  final DateTime added = DateTime.now();
+  String? name;
+  final DateTime added;
 
-  ListItem(this.barcode);
+  ListItem(this.barcode) : added = DateTime.now();
+
+  Map<String, dynamic> toJson() => {
+    "barcode": barcode,
+    "added": added.toIso8601String(),
+    "name": name,
+  };
+
+  ListItem.fromJson(Map<String, dynamic> json)
+      : barcode = json["barcode"],
+        added = DateTime.parse(json["added"]),
+        name = json["name"];
 }

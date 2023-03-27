@@ -1,0 +1,26 @@
+name: whats_in_my_fridge
+description: A new Flutter project.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.19.2 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_barcode_scanner: ^2.0.0
+  intl: ^0.18.0
+  audioplayers: ^3.0.1
+  http: ^0.13.5
+  opengtindb:
+    path: packages/opengtindb
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/beep-07a.mp3
